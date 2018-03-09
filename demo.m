@@ -1,6 +1,5 @@
 clear; clc; close all;
 
-%%
 lambda_store = (400:.1:800)';
 
 sun_spectrum = ones(size(lambda_store));
