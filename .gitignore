@@ -1,0 +1,14 @@
+**.DS_Store
+
+*.jpg
+*.png
+*.JPG
+*.mat
+*.fig
+
+black_body_radiance.pdf
+chromaticity_diagram_vs_wavelength.pdf
+MacAdam_Ellipse.pdf
+spec_xyz_proj.pdf
+
+plot_figures.nb
