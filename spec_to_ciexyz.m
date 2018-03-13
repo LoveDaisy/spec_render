@@ -3,25 +3,28 @@ function xyz = spec_to_ciexyz(spec, varargin)
 % to a CIE XYZ space
 %
 % INPUT
-%   spec:   n-by-2 matrix. wave length, power strength
+%   spec:   n*(1+k) matrix. wave length, power strength
 % PARAMETERS
 %   merge:          false (default) | true
 %   cmfprofile:     string. {'lin2012xyz10e_1' (default), 'ciexyz31_1'}
 % OUTPUT
-%   xyz:    n-by-3 matrix, XYZ, or
-%           1-by-3 vector
+%   xyz:    n*3*k matrix, or
+%           k*3 vector
 
-assert(size(spec, 2) == 2);
-assert(size(spec, 1) > 2);
+% assert(size(spec, 2) == 2);
+% assert(size(spec, 1) > 2);
 
 parameters = handle_parameter(varargin);
 
 cmf = parameters.cmf;
 
-xyz = bsxfun(@times, interp1(cmf(:, 1), cmf(:, 2:4), spec(:, 1)), spec(:, 2));
+cmf_interp = interp1(cmf(:, 1), cmf(:, 2:4), spec(:, 1));
+spec_pts = size(spec, 1);
+spec_num = size(spec, 2) - 1;
+xyz = bsxfun(@times, cmf_interp, reshape(spec(:, 2:end), spec_pts,1,spec_num));
 
 if parameters.merge
-    xyz = sum(xyz);
+    xyz = squeeze(sum(xyz))';
 end
 
 end

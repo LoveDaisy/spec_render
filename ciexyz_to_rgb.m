@@ -1,20 +1,28 @@
 function rgb = ciexyz_to_rgb(xyz, varargin)
 % This function converts CIE XYZ to RGB space
 % INPUT
-%   xyz:            n-by-3
+%   xyz:            n*3*k, or k*3
 % PARAMETERS
 %   space:          string. {'sRGB', 'AppleRGB', 'AdobeRGB', 'BestRGB'}
 %   method:         'ShrinkToGray', 'AddWhite', 'Clip'
 %   compand:        true
 % OUTPUT
-%   rgb:            n-by-3
+%   rgb:            n*3*k, or k*3
 
-assert(size(xyz, 2) == 3);
+% assert(size(xyz, 2) == 3);
 
 parameters = handle_parameters(varargin);
 
 [m, W, ~, compand_func] = get_convert_param(parameters.space);
-rgb_lin = parameters.xyz2rgb(xyz, m, W);
+if length(size(xyz)) > 2
+    xyz_flat = reshape(permute(xyz, [1,3,2]), [], 3);
+    rgb_lin = parameters.xyz2rgb(xyz_flat, m, W);
+    rgb_lin = reshape(rgb_lin, size(xyz,1), size(xyz,3), 3);
+    rgb_lin = permute(rgb_lin, [1,3,2]);
+else
+    rgb_lin = parameters.xyz2rgb(xyz, m, W);
+end
+
 if parameters.compand
     rgb = compand_func(rgb_lin);
 else

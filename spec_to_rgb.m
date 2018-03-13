@@ -1,33 +1,28 @@
 function rgb = spec_to_rgb(spec, varargin)
 % This function convert a spectral distribution to a RGB color
 % INPUT
-%   spec:       n-by-2 matrix
+%   spec:       n*(1+k) matrix
 % PARAMETERS
 %   Space:      string: {'sRGB' (default)}
-%   Method:     string: {'ShrinkToGray' (default), 'Clip', 'YoungsMethod', 
-%               'SpektresMethod'}
+%   Method:     string: {'ShrinkToGray' (default), 'Clip'}
 %   Mix:        true | false (default)
 %   MaxY:       scalar
 % OUTPUT
-%   rgb:        n-by-3 matrix, or
-%               1-by-3 vector
-
-assert(size(spec, 2) == 2);
+%   rgb:        n*3*k matrix, or
+%               3*k vector
 
 parameters = handle_parameter(varargin);
 
-switch parameters.method
-    case {'youngsmethod', 'spektresmethod'}
-        rgb = direct_convert(spec, parameters.method);
-    otherwise
-        xyz = spec_to_ciexyz(spec, 'CMFProfile', parameters.CMFProfile);
-        if parameters.mix
-            xyz = sum(xyz) / sum(xyz(:, 2)) * parameters.maxy;
-        else
-            xyz = xyz / max(xyz(:, 2)) * parameters.maxy;
-        end
-        rgb = ciexyz_to_rgb(xyz, 'space', parameters.space, 'method', parameters.method);
+xyz = spec_to_ciexyz(spec, 'CMFProfile', parameters.CMFProfile);
+if parameters.mix
+    xyz = sum(xyz);
+%     xyz = bsxfun(@times, sum(xyz), 1./sum(xyz(:, 2, :))) * parameters.maxy;
+    xyz = squeeze(xyz)';
+else
+    xyz = bsxfun(@times, xyz, 1./max(xyz(:, 2, :))) * parameters.maxy;
 end
+rgb = ciexyz_to_rgb(xyz, 'space', parameters.space, 'method', parameters.method);
+
 end
 
 function parameters = handle_parameter(varg)
